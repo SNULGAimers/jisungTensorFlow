@@ -17,4 +17,3 @@ model = tf.keras.model.Sequential([
     tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Dense(10, activation='softmax')
 ])
-
