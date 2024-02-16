@@ -5,6 +5,7 @@ import numpy as np
 
 titanic = pd.read_csv('https://storage.googleapis.com/tf-datasets/titanic/train.csv')
 print(titanic.head())
+print(titanic.shape)
 
 titanic_features = titanic.copy()
 titanic_labels = titanic_features.pop('survived')
@@ -39,10 +40,14 @@ for name, input in inputs.items():
     preprocessed_input.append(x)
 
 preprocessed_input_cat = layers.Concatenate()(preprocessed_input)
-titanic_preprocessing = tf.keras.Model(inputs, preprocessed_input_cat)
+titanic_preprocessing = tf.keras.Model(inputs, preprocessed_input_cat) #계산은 이 모델을 실행해야 이루어짐
+
 tf.keras.utils.plot_model(model=titanic_preprocessing, rankdir='LR', dpi=72, show_shapes=True)
 
 titanic_feature_dict = {name: np.array(value) for name, value in titanic_features.items()}
+
+x = tf.data.Dataset.from_tensor_slices((titanic_features, titanic_labels)).shuffle(507).batch(50)
+y = tf.data.Dataset.from_tensor_slices((titanic_features[507:], titanic_labels[507:])).batch(50)
 
 
 
@@ -51,14 +56,14 @@ def titanic_model(preprocessing_head, inputs):
         layers.Dense(64),
         layers.Dense(1)
     ])
-    preprocessed_input = preprocessing_head(inputs)
+    preprocessed_input = preprocessing_head(inputs) # 전처리된 모델을 얻음
     print(preprocessed_input.shape)
-    result = body(preprocessed_input)
-    model = tf.keras.Model(inputs, result)
+    result = body(preprocessed_input) 
+    model = tf.keras.Model(inputs, result) # 실행 모델
 
     model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
                   optimizer=tf.keras.optimizers.legacy.Adam(),
-                  metrics=['accuracy'])
+                  metrics=['accuracy']) # 마찬가지로 계산은 여기서 이루어짐
     return model 
 
 
